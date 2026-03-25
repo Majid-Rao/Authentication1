@@ -2,8 +2,9 @@ import express from 'express';
 import 'dotenv/config.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import ConnectDB from './config/db';
+import ConnectDB from './config/db.js';
 const app = express();
+//app.set("trust proxy", 1); for production
 const port = process.env.PORT || 3000;
 ConnectDB()
 .then(()=>{

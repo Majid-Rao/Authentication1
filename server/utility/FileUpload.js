@@ -12,7 +12,7 @@ const UploadCloudinary = async(localFilePath)=>{
        if(!localFilePath) return null;
    
       const result = await cloudinary.uploader.upload(localFilePath,{
-       folder : "users",
+       folder : "auth",
       });
       fs.unlinkSync(localFilePath);
       return result;
