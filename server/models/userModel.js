@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 import 'dotenv/config.js'
+import { type } from "os";
 const userSchema = new mongoose.Schema({
     fullName : {
         type : String,
@@ -16,6 +17,26 @@ const userSchema = new mongoose.Schema({
     password : {
         type : String,
         required : [true,"Password is required"]
+    },
+    verifyOtp : {
+        type : String,
+        default : ''
+    },
+    verifyOtpExpire : {
+        type : Number,
+        default : 0
+    },
+    isAccountVerified : {
+        type : Boolean,
+        default : false
+    },
+    resetOtp : {
+        type : String,
+        default : ''
+    },
+    resetOtpExpire : {
+        type : Number,
+        default : 0
     },
     coverImage : {
         type : String,

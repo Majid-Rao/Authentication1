@@ -159,4 +159,24 @@ const changePassword = asyncHandler(async(req,res)=>{
         new ApiResponse(201,{},"Password Changed!")
     )
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken,currentUser,changePassword}
+const sendVerifyOtp = asyncHandler(async(req,res)=>{
+     const {userId} = req.body;
+     const user = await User.findById(userId);
+     if(user.isAccountVerified){
+        throw new ApiError(401,"Account already verified!");
+     }
+
+     const otp = String(Math.floor(100000 + Math.random() * 900000));
+     user.verifyOtp = otp;
+     user.verifyOtpExpire = Date.now() + 24 * 60 * 60 * 1000;
+     await user.save({validateBeforeSave : false});
+
+     const mailerOption = {
+        from : process.env.SENDER_EMAIL,
+        to : user.email,
+        subject : "Your otp",
+        text : `Your Otp is ${otp}` 
+     }
+     await transporter.sendMail(mailerOption);
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,currentUser,changePassword,sendVerifyOtp}
