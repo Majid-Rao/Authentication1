@@ -160,8 +160,7 @@ const changePassword = asyncHandler(async(req,res)=>{
     )
 })
 const sendVerifyOtp = asyncHandler(async(req,res)=>{
-     const {userId} = req.body;
-     const user = await User.findById(userId);
+     const user = await User.findById(req.user._id);
      if(user.isAccountVerified){
         throw new ApiError(401,"Account already verified!");
      }
@@ -178,5 +177,31 @@ const sendVerifyOtp = asyncHandler(async(req,res)=>{
         text : `Your Otp is ${otp}` 
      }
      await transporter.sendMail(mailerOption);
+     return res.status(200).json(
+        new ApiResponse(201,"Otp send")
+     )
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken,currentUser,changePassword,sendVerifyOtp}
+const verifyEmail = asyncHandler(async(req,res)=>{
+   const {otp} = req.body;
+   if(!otp){
+    throw new ApiError(401,"otp not found");
+   } 
+   const user = await User.findById(req.user._id);
+   if(!user) throw new ApiError(400,"user not found for verification!");
+   
+   if(user.verifyOtp === '' || user.verifyOtp !== otp){
+    throw new ApiError(400,"otp not matched!");
+   }
+
+   if(user.verifyOtpExpire<Date.now()) throw new ApiError(401,"Otp expired!");
+   
+   user.isAccountVerified = true;
+   user.verifyOtp = '';
+   user.verifyOtpExpire = 0;
+   await user.save({validateBeforeSave:false});
+
+   return res.status(200).json(
+    new ApiResponse(201,"Account Verified!")
+   )
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,currentUser,changePassword,sendVerifyOtp,verifyEmail}
