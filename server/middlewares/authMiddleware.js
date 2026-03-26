@@ -1,12 +1,13 @@
- import { ApiError } from "../utility/ApiError";
+ import { ApiError } from "../utility/ApiError.js";
 import jwt from "jsonwebtoken";
-import { asyncHandler } from "../utility/asyncHandler";
+import { asyncHandler } from "../utility/asyncHandler.js";
 import "dotenv/config.js"
 import cookieParser from 'cookie-parser';
-import { User } from "../models/userModel";
+import { User } from "../models/userModel.js";
 const validateTokens = asyncHandler(async(req,res,next)=>{
-     const token = req.cookies?.AccessToken || 
-     req.header("Authorization")?.replace("Bearer ","");
+  const token =
+    req.cookies?.AccessToken ||
+    req.header("Authorization")?.replace("Bearer ", "");
 
      if(!token) throw new ApiError(400,"tokens not found!");
 

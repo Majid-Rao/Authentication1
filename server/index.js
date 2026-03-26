@@ -3,6 +3,7 @@ import 'dotenv/config.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import ConnectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js'
 const app = express();
 //app.set("trust proxy", 1); for production
 const port = process.env.PORT || 3000;
@@ -31,7 +32,8 @@ app.use(cookieParser());
 app.get('/',(req,res)=>{
     res.send('hello')
 })
-
+// routes
+app.use("/api",authRoutes);
 
 // app.listen(port, ()=>{
 //     console.log("server running",port);

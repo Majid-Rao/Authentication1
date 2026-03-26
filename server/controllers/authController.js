@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import express from "express";
 import jwt from "jsonwebtoken"
-import User from "../models/userModel.js"
+import {User} from "../models/userModel.js"
 import {asyncHandler} from "../utility/asyncHandler.js"
 import {ApiError} from "../utility/ApiError.js"
 import {ApiResponse} from "../utility/ApiResponse.js"
@@ -81,12 +81,12 @@ const loginUser = asyncHandler(async(req,res)=>{
     httpOnly : true,
     secure : false,
    }
-   return res.status(201)
+   return res.status(200)
    .cookie("AccessToken",AccessToken,options)
    .cookie("RefreshToken",RefreshToken,options)
    .json(
     new ApiResponse(
-        200,
+        201,
         { 
             user : LoggedInUser,AccessToken,RefreshToken
         },
@@ -95,10 +95,10 @@ const loginUser = asyncHandler(async(req,res)=>{
    )
 })
 const logoutUser = asyncHandler(async(req,res)=>{
-    await User.findByIdandUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set : {refreshToken:undefined}
+            $unset: { refreshToken: 1 }
         },
         {
             new : true
