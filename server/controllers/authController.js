@@ -204,4 +204,44 @@ const verifyEmail = asyncHandler(async(req,res)=>{
     new ApiResponse(201,"Account Verified!")
    )
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken,currentUser,changePassword,sendVerifyOtp,verifyEmail}
+const sendPasswordOtp = asyncHandler(async(req,res)=>{
+    const {email} = req.body;
+    if(!email) throw new ApiError(400,"Email is required!");
+    const existedUser = await User.findOne({email});
+    if(!existedUser) throw new ApiError(401,"This email is no registered!");
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    existedUser.resetOtp = otp;
+    existedUser.resetOtpExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await existedUser.save({validateBeforeSave:false});
+    const mailerOption = {
+        from : process.env.SENDER_EMAIL,
+        to : email,
+        subject : "reset your password",
+        text : `Your Otp is ${otp}`
+    }
+    await transporter.sendMail(mailerOption);
+    return res.status(200).json(
+        new ApiResponse(201,"OTP Send")
+    )
+})
+const verifyPassword = asyncHandler(async(req,res)=>{
+    const {email,otp,newPassword} = req.body;
+    if(!email || !otp) throw new ApiError(400,"Some information is missing!");
+    const user = await User.findOne({email});
+    if(!user) throw new ApiError(400,"user not found!");
+    if(user.resetOtp === '' || user.resetOtp !== otp){
+        throw new ApiError(401,"Resetotp not matched!");
+    }
+
+    if(user.resetOtpExpire<Date.now()) throw new ApiError(401,"otp expired");
+    if(!newPassword) throw new ApiError(400,"please enter password")
+    user.password = newPassword; 
+    user.resetOtp = '';
+    user.resetOtpExpire = 0;
+    await user.save({validateBeforeSave:false});
+    return res.status(200).json(
+        new ApiResponse(201,"Password Reset Successfully!")
+    )
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,
+    currentUser,changePassword,sendVerifyOtp,verifyEmail,sendPasswordOtp,verifyPassword}

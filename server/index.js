@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import ConnectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js'
+import userRoutes from './routes/userRoutes.js'
+
 const app = express();
 //app.set("trust proxy", 1); for production
 const port = process.env.PORT || 3000;
@@ -34,7 +36,7 @@ app.get('/',(req,res)=>{
 })
 // routes
 app.use("/api",authRoutes);
-
+app.use("/api",userRoutes)
 // app.listen(port, ()=>{
 //     console.log("server running",port);
     
